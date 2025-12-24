@@ -21,6 +21,9 @@ class App {
         this.toggleUIBtn = document.getElementById('toggleUIBtn');
         this.sensorBtn = document.getElementById('sensorBtn');
         this.controls = document.getElementById('controls');
+        this.selectionOverlay = document.getElementById('selectionOverlay');
+        this.selectionInstruction = document.getElementById('selectionInstruction');
+        this.selectionCount = document.getElementById('selectionCount');
 
         // 加速度センサー状態
         this.sensorEnabled = false;
@@ -456,41 +459,33 @@ class App {
                 this.settingsBtn.classList.add('hidden');
                 this.sensorBtn.classList.add('hidden');
                 this.resetBtn.classList.add('hidden');
+                // コントロールパネル表示、選択オーバーレイ非表示
+                this.controls.classList.remove('hidden');
+                this.selectionOverlay.classList.add('hidden');
                 break;
 
             case 'select':
+                // コントロールパネルを非表示にして選択オーバーレイを表示
+                this.controls.classList.add('hidden');
                 if (count === 0) {
-                    this.instruction.textContent = '1つ目の領域をドラッグで選択';
+                    this.selectionInstruction.textContent = 'ドラッグで領域を選択';
                 } else {
-                    this.instruction.textContent = '追加の領域をドラッグで選択';
+                    this.selectionInstruction.textContent = 'ドラッグで追加の領域を選択';
                 }
-                this.regionCount.textContent = '';
-                this.imageInputLabel.classList.add('hidden');
-                this.loadPresetBtn.classList.add('hidden');
-                this.startBtn.classList.add('hidden');
-                this.autoSelect.classList.add('hidden');
-                this.manualSelect.classList.add('hidden');
-                this.savePresetBtn.classList.add('hidden');
-                this.editRegionBtn.classList.add('hidden');
-                this.settingsBtn.classList.add('hidden');
-                this.sensorBtn.classList.add('hidden');
-                this.resetBtn.classList.add('hidden');
+                this.selectionCount.textContent = '';
+                this.selectionOverlay.classList.remove('hidden');
                 this.renderer.enableSelection();
                 break;
 
             case 'confirm':
-                this.instruction.textContent = 'ドラッグで追加、タップで削除';
-                this.regionCount.textContent = `選択済み: ${count}個`;
-                this.imageInputLabel.classList.add('hidden');
-                this.loadPresetBtn.classList.add('hidden');
-                this.startBtn.classList.remove('hidden');
-                this.autoSelect.classList.add('hidden');
-                this.manualSelect.classList.add('hidden');
-                this.savePresetBtn.classList.remove('hidden');
-                this.editRegionBtn.classList.add('hidden');
-                this.settingsBtn.classList.add('hidden');
-                this.sensorBtn.classList.add('hidden');
-                this.resetBtn.classList.remove('hidden');
+                // コントロールパネルを非表示のまま、選択オーバーレイに情報を表示
+                this.controls.classList.add('hidden');
+                this.selectionInstruction.textContent = 'ドラッグで追加、タップで削除';
+                this.selectionCount.textContent = `選択済み: ${count}個`;
+                this.selectionOverlay.classList.remove('hidden');
+                // 開始/終了ボタンを右上に表示
+                this.toggleUIBtn.classList.add('hidden');
+                this.showConfirmButtons();
                 // confirmモードでも選択（追加）を有効化
                 this.renderer.enableSelection();
                 break;
@@ -509,12 +504,46 @@ class App {
                 this.sensorBtn.classList.remove('hidden');
                 this.resetBtn.classList.remove('hidden');
                 this.toggleUIBtn.classList.remove('hidden');
+                // コントロールパネル表示、選択オーバーレイ非表示
+                this.controls.classList.remove('hidden');
+                this.selectionOverlay.classList.add('hidden');
+                this.hideConfirmButtons();
                 this.renderer.disableSelection();
                 // デフォルトで枠を非表示
                 if (this.renderer.isShowingRegions()) {
                     this.renderer.toggleRegionDisplay();
                 }
                 break;
+        }
+    }
+
+    /**
+     * confirmモード用の右上ボタンを表示
+     */
+    showConfirmButtons() {
+        if (!this.confirmButtonsContainer) {
+            this.confirmButtonsContainer = document.createElement('div');
+            this.confirmButtonsContainer.id = 'confirmButtons';
+            this.confirmButtonsContainer.className = 'confirm-buttons';
+            this.confirmButtonsContainer.innerHTML = `
+                <button id="confirmStartBtn" class="confirm-btn start">開始</button>
+                <button id="confirmResetBtn" class="confirm-btn reset">終了</button>
+            `;
+            document.getElementById('mainScreen').appendChild(this.confirmButtonsContainer);
+
+            // イベントリスナーを追加
+            document.getElementById('confirmStartBtn').addEventListener('click', () => this.startAnimation());
+            document.getElementById('confirmResetBtn').addEventListener('click', () => this.resetApp());
+        }
+        this.confirmButtonsContainer.classList.remove('hidden');
+    }
+
+    /**
+     * confirmモード用のボタンを非表示
+     */
+    hideConfirmButtons() {
+        if (this.confirmButtonsContainer) {
+            this.confirmButtonsContainer.classList.add('hidden');
         }
     }
 
@@ -718,6 +747,7 @@ class App {
         this.isUIVisible = true;
         this.controls.classList.remove('hidden');
         this.toggleUIBtn.classList.add('hidden');
+        this.hideConfirmButtons();
 
         // センサー状態をリセット
         this.sensorEnabled = false;

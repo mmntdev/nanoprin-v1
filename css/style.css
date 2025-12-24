@@ -284,6 +284,65 @@ button:active {
     pointer-events: none;
 }
 
+/* 領域選択時の指示オーバーレイ */
+.selection-instruction {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.selection-instruction p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.selection-instruction p:last-child {
+    color: #4ecdc4;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+/* confirmモード用の右上ボタン */
+.confirm-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+
+.confirm-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.confirm-btn:active {
+    transform: scale(0.95);
+}
+
+.confirm-btn.start {
+    background: linear-gradient(135deg, #e94560, #0f3460);
+    color: white;
+}
+
+.confirm-btn.reset {
+    background: #333;
+    color: #a0a0a0;
+}
+
 /* プリセット読み込みボタン */
 .preset-btn {
     margin-top: 15px;
