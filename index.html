@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>nanoprin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- プリセット一覧モーダル -->
+        <div id="presetModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>保存データ</h2>
+                    <button id="closeModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div id="presetList" class="preset-list">
+                    <p class="empty-message">保存データがありません</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- メイン画面 -->
+        <div id="mainScreen" class="screen">
+            <canvas id="mainCanvas"></canvas>
+
+            <!-- UI非表示ボタン（角に配置） -->
+            <button id="toggleUIBtn" class="corner-btn hidden">UI</button>
+
+            <!-- コントロールパネル -->
+            <div id="controls">
+                <p id="instruction">画像を選択してください</p>
+                <p id="regionCount"></p>
+                <div id="buttonGroup">
+                    <label for="imageInput" class="file-label-btn">画像を選択</label>
+                    <input type="file" id="imageInput" accept="image/*">
+                    <button id="loadPresetBtn">保存データ</button>
+                    <button id="startBtn" class="hidden">開始</button>
+                    <select id="autoSelect" class="hidden">
+                        <option value="">自動:OFF</option>
+                        <option value="breath">自動:呼吸</option>
+                        <option value="walk">自動:歩行</option>
+                        <option value="run">自動:駆け足</option>
+                        <option value="jump">自動:ジャンプ</option>
+                        <option value="shake">自動:震え</option>
+                        <option value="wave">自動:波打ち</option>
+                        <option value="kneadLeft">自動:揉み1</option>
+                        <option value="kneadRight">自動:揉み2</option>
+                    </select>
+                    <select id="manualSelect" class="hidden">
+                        <option value="">手動:OFF</option>
+                        <option value="global" selected>手動:間接</option>
+                        <option value="pointer">手動:直接</option>
+                    </select>
+                    <button id="sensorBtn" class="hidden">加速度センサ:OFF</button>
+                    <button id="savePresetBtn" class="hidden">保存</button>
+                    <button id="settingsBtn" class="hidden">設定</button>
+                    <button id="editRegionBtn" class="hidden">領域編集</button>
+                    <button id="resetBtn" class="hidden">終了</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>設定</h2>
+                <button id="closeSettingsBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="settings-form">
+                <div class="setting-row setting-toggle">
+                    <label>枠表示:</label>
+                    <button id="toggleRegionBtn" class="toggle-btn">OFF</button>
+                </div>
+                <div class="setting-row setting-toggle">
+                    <label>メッシュ表示:</label>
+                    <button id="toggleMeshBtn" class="toggle-btn">OFF</button>
+                </div>
+                <div class="setting-separator"></div>
+                <div class="setting-row">
+                    <label>自動強さ:</label>
+                    <input type="range" id="autoStrengthRange" min="0.5" max="2.0" step="0.1">
+                    <span id="autoStrengthValue">1.0</span>
+                </div>
+                <div class="setting-row">
+                    <label>メッシュ密度:</label>
+                    <input type="range" id="gridDensityRange" min="5" max="40" step="1">
+                    <span id="gridDensityValue">20</span>
+                </div>
+                <div class="setting-separator"></div>
+                <div class="setting-row">
+                    <label>硬さ:</label>
+                    <input type="range" id="stiffnessRange" min="0.02" max="0.2" step="0.01">
+                    <span id="stiffnessValue">0.08</span>
+                </div>
+                <div class="setting-row">
+                    <label>減衰:</label>
+                    <input type="range" id="dampingRange" min="0.8" max="0.99" step="0.01">
+                    <span id="dampingValue">0.92</span>
+                </div>
+                <div class="setting-row">
+                    <label>感度:</label>
+                    <input type="range" id="sensitivityRange" min="1" max="10" step="0.5">
+                    <span id="sensitivityValue">3.0</span>
+                </div>
+                <div class="setting-row">
+                    <label>停止閾値(位置):</label>
+                    <input type="range" id="posThresholdRange" min="0.1" max="1.0" step="0.1">
+                    <span id="posThresholdValue">0.3</span>
+                </div>
+                <div class="setting-row">
+                    <label>停止閾値(速度):</label>
+                    <input type="range" id="velThresholdRange" min="0.01" max="0.2" step="0.01">
+                    <span id="velThresholdValue">0.05</span>
+                </div>
+                <button id="resetSettingsBtn" class="reset-settings-btn">デフォルトに戻す</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存ダイアログ -->
+    <div id="saveModal" class="modal hidden">
+        <div class="modal-content save-modal">
+            <div class="modal-header">
+                <h2>保存</h2>
+                <button id="closeSaveModalBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="save-form">
+                <label for="presetName">名前:</label>
+                <input type="text" id="presetName" placeholder="プリセット名を入力">
+                <button id="confirmSaveBtn" class="save-confirm-btn">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/motion.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
